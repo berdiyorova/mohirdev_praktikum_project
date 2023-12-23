@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView, DetailView, TemplateView
+from django.views.generic import ListView, DetailView, TemplateView, UpdateView, DeleteView
 from .forms import ConatactForm
 
 from .models import News, Category
@@ -149,6 +149,18 @@ class ContactPageView(TemplateView):
         return render(request, 'news/contact.html', context)
 
 
+
+class NewsUpdateView(UpdateView):
+    model = News
+    fields = ('title', 'body', 'image', 'category', 'status')
+    template_name = 'crud/news_edit.html'
+
+
+
+class NewsDeleteViews(DeleteView):
+    model = News
+    template_name = 'crud/news_delete.html'
+    success_url = 'index_page'
 
 def about_view(request):
     context = {
