@@ -1,0 +1,37 @@
+{% extends 'news/base.html' %}
+
+{% load static %}
+
+{% block title %} Foydalanuvchi profili {% endblock title %}
+
+{% block content %}
+
+    <section id="contentSection">
+        <h3>Xush kelibsiz, {{ user.username }}!</h3>
+        <h2>Siz haqingizdagi ma'lumotlar:</h2>
+        <img src="{{ profile.photo.url }}" class="img-thumbnail">
+        <div class="d-block">
+            <label class="form-label">Ismingiz</label><input value="{{ user.first_name }}" readonly class="form-control" placeholder="Kiritilmagan">
+        </div>
+        <div class="d-block">
+            <label class="form-label">Familiyangiz</label><input value="{{ user.last_name }}" readonly class="form-control" placeholder="Kiritilmagan">
+        </div>
+        <div class="d-block">
+            <label class="form-label">Username</label><input value="{{ user.username }}" readonly class="form-control" placeholder="Kiritilmagan">
+        </div>
+        <div class="d-block">
+            <label class="form-label">Tug'ilgan sanangiz</label><input value="{{ profile.date_of_birth }}" readonly class="form-control" placeholder="Kiritilmagan">
+        </div>
+        <div class="d-block">
+            <label class="form-label">Emailingiz</label><input value="{{ user.email }}" readonly class="form-control" placeholder="Kiritilmagan">
+        </div>
+        <hr>
+        <a href="{% url 'password_change' %}" class="btn btn-primary text-bold">Parolni almashtirish</a>
+        <a href="{% url 'edit_user_info' %}" class="btn btn-primary text-bold">Profilni o'zgartirish</a>
+        <div class="d-block">
+            <a href="{% url 'logout' %}" class="btn btn-danger text-bold">Log Out</a>
+        </div>
+    </section>
+<!--        <button type="button" onclick="document.location='{% url 'logout' %}'">Logout</button>-->
+
+{% endblock content %}

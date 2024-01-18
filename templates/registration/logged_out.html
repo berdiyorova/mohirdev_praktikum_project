@@ -1,0 +1,15 @@
+{% extends 'news/base.html' %}
+
+{% load static %}
+
+{% block title %} Logout sahifasi {% endblock title %}
+
+{% block content %}
+
+<section id="contentSection">
+    <h2>Log Out</h2>
+    <p>Siz veb saytdan chiqdingiz. <a href="{% url 'login' %}" class="btn btn-primary text-bold">Qaytadan kirish</a> </p>
+    {{ request.user.is_authenticated }}
+</section>
+
+{% endblock content %}

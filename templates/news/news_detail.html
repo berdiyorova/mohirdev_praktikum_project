@@ -1,14 +1,66 @@
 {% extends 'news/base.html' %}
 
 {% load static %}
+{% load hitcount_tags %}
 
 {% block title %} {{ news.title }} {% endblock title %}
 
 {% block content %}
 
-<h2>{{ news.title }}</h2>
-<h5>{{ news.publish_time }}</h5>
-<img src="{{ news.image.url }}">
-<p>{{ news.body }}</p>
+    <h2>{{ news.title }}</h2>
+<h5>
+    {{ news.publish_time }} || Ko'rilganlar soni: <i class="fa fa-eye" aria-hidden="true"></i> {% get_hit_count for news %}
+    || Izohlar soni: {{ comment_count }}
+</h5>
+    <img src="{{ news.image.url }}">
+    <p>{{ news.body }}</p>
+
+    {% if request.user.is_authenticated and request.user.is_superuser %}
+        <div class="card-footer text-center">
+            <a href="{% url 'news_edit' news.slug %}" class="btn btn-info text-upper">Tahrirlash</a>
+            <a href="{% url 'news_delete' news.slug %}" class="btn btn-danger text-upper">O'chirish</a>
+        </div>
+    {% endif %} <br>
+
+    <div class="row">
+        <div class="col-md-6">
+
+            {% if comments %}
+                <h4>Bu yangilikka {{ comment_count }} ta izoh qoldirilgan</h4>
+            {% else %}
+                <h4>Hozircha izohlar mavjud emas.</h4>
+            {% endif %}
+
+            {% for comment in comments %}
+                <div class="container">
+                    <p>
+                        <strong>{{ comment.user }}</strong>
+                        <span class="text-muted fw-normal">{{ comment.created_time }}</span>
+                    </p>
+                    <p>{{ comment.body }}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-md-6 card mb-4 mt-3">
+            <div class="card-body">
+                {% if request.user.is_authenticated %}
+                    <h3>Izoh qoldirish</h3>
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        {{ comment_form.as_p }}
+                        <button type="submit" class="btn btn-success">Yuborish</button>
+                    </form>
+                {% else %}
+                    <p class="text-danger">Faqatgina ro'yxatdan o'tgan foydalanuvchilargina izoh qoldirishi mumkin.</p>
+                    <p>Izoh qoldirish uchun avval <a href="{% url 'user_register' %}" class="text-primary">ro'yxatdan o'ting</a>
+                     va <a href="{% url 'login' %}" class="text-primary">saytga kiring</a></p>
+                {% endif %}
+            </div>
+        </div>
+
+
+
+    </div>
 
 {% endblock %}

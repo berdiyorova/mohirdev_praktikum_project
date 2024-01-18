@@ -1,7 +1,17 @@
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
+from django.db.models import Q
 from django.http import HttpResponse
+from django.urls import reverse_lazy
+from django.utils.text import slugify
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView, DetailView, TemplateView, UpdateView, DeleteView
-from .forms import ConatactForm
+from django.views.generic import ListView, DetailView, TemplateView, UpdateView, DeleteView, CreateView
+from hitcount.utils import get_hitcount_model
+from hitcount.views import HitCountMixin
+
+from .forms import ConatactForm, CommentForm
+from news_project.custom_permissions import OnlyLoggedSuperUser
 
 from .models import News, Category
 
@@ -20,10 +30,43 @@ def news_list(request):
     context = { 'news_list': news_list }
     return render(request, "news/news_list.html", context=context)
 
-def news_detail(request, news):
-    news = get_object_or_404(News, slug=news, status=News.Status.Published)
+def news_detail(request, slug):
+    news = get_object_or_404(News, slug=slug, status=News.Status.Published)
+    context = {}
+    # hitcount logik
+    hit_count = get_hitcount_model().objects.get_for_object(news)
+    hits = hit_count.hits
+    hitcontext = context['hitcount'] = {'pk': hit_count.pk}
+    hit_count_response = HitCountMixin.hit_count(request, hit_count)
+    if hit_count_response.hit_counted:
+        hits = hits + 1
+        hitcontext['hit_counted'] = hit_count_response.hit_counted
+        hitcontext['hit_message'] = hit_count_response.hit_message
+        hitcontext['total_hits'] = hits
+
+    comments = news.comments.filter(active=True)
+    comment_count = comments.count()
+    new_comment = None
+    if request.method == 'POST':
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            # yangi comment obyektini yaratamiz lekin MB ga saqlamaymiz
+            new_comment = comment_form.save(commit=False)
+            # izohni izh yozilayotgan yangilik bilan bog'laymiz
+            new_comment.news = news
+            # izoh egasini so'rov yuborayotgan user bilan bog'laymiz
+            new_comment.user = request.user
+            # yangi izohni MB ga saqlaymiz
+            new_comment.save()
+            comment_form = CommentForm()
+    else:
+        comment_form = CommentForm()
     context = {
-        'news': news
+        'news': news,
+        'comments': comments,
+        'comment_count': comment_count,
+        'new_comment': new_comment,
+        'comment_form': comment_form,
     }
     return render(request, "news/news_detail.html", context)
 
@@ -33,9 +76,36 @@ def news_detail(request, news):
 #     template_name = 'news_list.html'
 #     context_object_name = 'news_list'
 #
-# class NewsDetail(DetailView):
-#     model = News
-#     template_name = 'news_detail.html'
+class NewsDetail(DetailView):
+    # specify the model to use
+    model = News
+    template_name = 'news/news_detail.html'
+    context_object_name = 'news'
+
+    # override context data
+    def get_context_data(self, slug, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Ma'lum yangilik obyekti
+        news = News.objects.filter(slug = slug)
+        comments = news.comments.filter(active=True)
+        new_comment = None
+        comment_form = CommentForm()
+
+        if self.request.method == 'POST':
+            comment_form = CommentForm(data=self.request.POST)
+            if comment_form.is_valid():
+                # Yangi izoh obyektini yaratish
+                new_comment = comment_form.save(commit=False)
+                new_comment.news = news
+                new_comment.user = self.request.user
+                new_comment.save()
+                # Izoh yuborilgach, formani yangilab qo'yish
+                comment_form = CommentForm()
+        context['news'] = news
+        context['comments'] = comments
+        context['new_comment'] = new_comment
+        context['comment_form'] = comment_form
+        return context
 
 # def index_view(request):
 #     categories = Category.objects.all()
@@ -78,7 +148,7 @@ class LocalView(ListView):
     context_object_name = 'mahalliy'
 
     def get_queryset(self):
-        news = self.model.published.all().filter(category__name = 'Mahalliy')
+        news = self.model.published.all().order_by('-publish_time').filter(category__name = 'Mahalliy')[:20]
         return news
 
 
@@ -150,17 +220,29 @@ class ContactPageView(TemplateView):
 
 
 
-class NewsUpdateView(UpdateView):
+class NewsUpdateView(OnlyLoggedSuperUser, UpdateView):
     model = News
     fields = ('title', 'body', 'image', 'category', 'status')
     template_name = 'crud/news_edit.html'
 
 
 
-class NewsDeleteViews(DeleteView):
+class NewsDeleteViews(OnlyLoggedSuperUser, DeleteView):
     model = News
     template_name = 'crud/news_delete.html'
-    success_url = 'index_page'
+    success_url = reverse_lazy('index_page')
+
+
+
+class NewsCreateView(OnlyLoggedSuperUser, CreateView):
+    model = News
+    fields = ('title', 'slug', 'body', 'image', 'category', 'status')
+    template_name = 'crud/news_create.html'
+
+    def save(self, *args, **kwargs):
+        self.model.slug = slugify(self.model.title)
+        self.save(*args, **kwargs)
+
 
 def about_view(request):
     context = {
@@ -174,3 +256,29 @@ def _404_page(request):
 
     }
     return render(request, 'news/404.html', context)
+
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_page_view(request):
+    admin_users = User.objects.filter(is_superuser=True)
+    print(admin_users)
+    context = {
+        'admin_users': admin_users
+    }
+    return render(request, 'pages/admin_page.html', context)
+
+
+class SearchResultsList(ListView): # testdriven.io saytida qidiruv tizimini mukammal qilish yo'llari berilgan
+    model = News
+    template_name = 'news/search_result.html'
+    context_object_name = 'barcha_yangiliklar'
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        return News.objects.filter(
+            # icontains (contains dan farqli tomoni) katta-kichik harflarni farqlamaydi
+            Q(title__icontains=query) | Q(body__icontains=query)
+        )
+    
