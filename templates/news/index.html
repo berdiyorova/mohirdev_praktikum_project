@@ -1,8 +1,12 @@
 {% extends 'news/base.html' %}
+
 {% load static %}
 {% load hitcount_tags %}
+{% load i18n %}
 
-{% block title %} Bosh sahifa {% endblock title %}
+{% block title %}
+  {% blocktrans %}Bosh sahifa{% endblocktrans %}
+{% endblock title %}
 
 {% block content %}
   <section id="sliderSection">
@@ -21,7 +25,7 @@
       </div>
       <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="latest_post">
-          <h2><span>So'ngi yangiliklar</span></h2>
+          <h2>{% blocktrans %}<span>So'ngi yangiliklar</span>{% endblocktrans %}</h2>
           <div class="latest_post_container">
             <div id="prev-button"><i class="fa fa-chevron-up"></i></div>
             <ul class="latest_postnav">
@@ -47,7 +51,7 @@
       <div class="col-lg-8 col-md-8 col-sm-8">
         <div class="left_content">
           <div class="single_post_content">
-            <h2><span>Mahalliy</span></h2>
+            <h2><span>{% blocktranslate %}Mahalliy{% endblocktranslate %}</span></h2>
             <div class="single_post_content_left">
               <ul class="business_catgnav  wow fadeInDown">
                 {% for local in local_one %}
@@ -77,7 +81,7 @@
           <div class="fashion_technology_area">
             <div class="fashion">
               <div class="single_post_content">
-                <h2><span>Xorij</span></h2>
+                <h2><span>{% blocktranslate %}Xorij{% endblocktranslate %}</span></h2>
                 <ul class="business_catgnav wow fadeInDown">
                   {% for foreign in foreign_one %}
                     <li>
@@ -103,7 +107,7 @@
             </div>
             <div class="technology">
               <div class="single_post_content">
-                <h2><span>Texnologiya</span></h2>
+                <h2><span>{% blocktranslate %}Texnologiya{% endblocktranslate %}</span></h2>
                 <ul class="business_catgnav">
                   {% for techno in techno_one %}
                     <li>
@@ -129,7 +133,7 @@
             </div>
           </div>
           <div class="single_post_content">
-            <h2><span>Photography</span></h2>
+            <h2><span>{% blocktranslate %}Photography{% endblocktranslate %}</span></h2>
             <ul class="photograph_nav  wow fadeInDown">
               <li>
                 <div class="photo_grid">
@@ -164,7 +168,7 @@
             </ul>
           </div>
           <div class="single_post_content">
-            <h2><span>Sport</span></h2>
+            <h2><span>{% blocktranslate %}Sport{% endblocktranslate %}</span></h2>
             <div class="single_post_content_left">
               <ul class="business_catgnav">
                 {% for sport in sport_one %}
@@ -196,7 +200,7 @@
       <div class="col-lg-4 col-md-4 col-sm-4">
         <aside class="right_content">
           <div class="single_sidebar">
-            <h2><span>Ommabop xabarlar</span></h2>
+            <h2><span>{% blocktranslate %}Ommabop xabarlar{% endblocktranslate %}</span></h2>
             <ul class="spost_nav">
               <li>
                 <div class="media wow fadeInDown"> <a href="{% url 'about_page' %}" class="media-left"> <img alt="" src="{% static 'images/post_img1.jpg' %}"> </a>
@@ -266,20 +270,20 @@
             </div>
           </div>
           <div class="single_sidebar wow fadeInDown">
-            <h2><span>Sponsor</span></h2>
+            <h2><span>{% blocktranslate %}Sponsor{% endblocktranslate %}</span></h2>
             <a class="sideAdd" href="#"><img src="{% static 'images/add_img.jpg' %}" alt=""></a> </div>
           <div class="single_sidebar wow fadeInDown">
-            <h2><span>Category Archive</span></h2>
+            <h2><span>{% blocktranslate %}Category Archive{% endblocktranslate %}</span></h2>
             <select class="catgArchive">
-              <option>Select Category</option>
-              <option>Life styles</option>
-              <option>Sports</option>
-              <option>Technology</option>
-              <option>Treads</option>
+              <option>{% blocktranslate %}Select Category{% endblocktranslate %}</option>
+              <option>{% blocktranslate %}Life styles{% endblocktranslate %}</option>
+              <option>{% blocktranslate %}Sports{% endblocktranslate %}</option>
+              <option>{% blocktranslate %}Technology{% endblocktranslate %}</option>
+              <option>{% blocktranslate %}Treads{% endblocktranslate %}</option>
             </select>
           </div>
           <div class="single_sidebar wow fadeInDown">
-            <h2><span>Links</span></h2>
+            <h2><span>{% blocktranslate %}Links{% endblocktranslate %}</span></h2>
             <ul>
               <li><a href="#">Blog</a></li>
               <li><a href="#">Rss Feed</a></li>

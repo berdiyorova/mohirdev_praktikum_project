@@ -222,7 +222,7 @@ class ContactPageView(TemplateView):
 
 class NewsUpdateView(OnlyLoggedSuperUser, UpdateView):
     model = News
-    fields = ('title', 'body', 'image', 'category', 'status')
+    fields = ('title_uz', 'title_ru', 'title_en', 'slug', 'body_uz', 'body_ru', 'body_en', 'image', 'category', 'status')
     template_name = 'crud/news_edit.html'
 
 
@@ -236,7 +236,7 @@ class NewsDeleteViews(OnlyLoggedSuperUser, DeleteView):
 
 class NewsCreateView(OnlyLoggedSuperUser, CreateView):
     model = News
-    fields = ('title', 'slug', 'body', 'image', 'category', 'status')
+    fields = ('title_uz', 'title_ru', 'title_en', 'slug', 'body_uz', 'body_ru', 'body_en', 'image', 'category', 'status')
     template_name = 'crud/news_create.html'
 
     def save(self, *args, **kwargs):

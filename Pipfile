@@ -6,6 +6,10 @@ name = "pypi"
 [packages]
 django = "==4.0"
 pillow = "*"
+django-hitcount = "*"
+modeltranslation = "*"
+django-modeltranslation = "*"
+python-gettext = "*"
 
 [dev-packages]
 
